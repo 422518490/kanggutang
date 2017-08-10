@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+    <head>
+        <title>重置密码</title>
+        <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/addUserPage.css}" />
+        <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    </head>
+    <body>
+        <form id="addPageForm">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>账号</td>
+                        <td><input th:type="text" th:id="loginName" th:name="loginName" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td>电话</td>
+                        <td><input th:type="text" th:id="phone" th:name="phone" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td><input th:type="button" onclick="resetPwd()" th:value="确定" /></td>
+                        <td><input th:type="button" onclick="cancelResetPwd()" th:value="取消" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </body>
+
+    <script>
+
+        function resetPwd() {
+            var loginName = $("#loginName").val();
+            var phone = $("#phone").val();
+            if(loginName == "" || loginName == undefined){
+                alert("账号不能为空");
+                return false;
+            }
+            if(phone == "" || phone == undefined){
+                alert("电话不能为空");
+                return false;
+            }
+            var userArray = {};
+            userArray["loginName"] = loginName;
+            userArray["phone"] = phone;
+            $.ajax({
+                url:"/resetPwd",
+                type:"post",
+                dataType:"json",
+                contentType: "application/json",
+                async: false,
+                data:JSON.stringify(userArray),
+                success:function callbackFun(data){
+                    //解析json
+                    alert(data.responseDesc);
+                    if(data.responseCode == 200){
+                        setTimeout(function(){
+                            window.history.back();
+                        },500);
+                    }
+                },
+                error:function(data){
+                    alert(data);
+                }
+            });
+        }
+
+        function cancelResetPwd() {
+            $("#loginName").val("");
+            $("#phone").val("");
+        }
+    </script>
+</html>

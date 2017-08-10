@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+    <head>
+        <title>新增支出</title>
+        <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/addExpensePage.css}" />
+        <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    </head>
+    <body>
+        <input th:hidden="hidden" th:id="userId" />
+        <input th:hidden="hidden" th:id="accessToken" />
+        <form id="addExpensePageForm">
+            <table>
+                <tr>
+                    <td>支出类型</td>
+                    <td  th:width="120px">
+                        <select th:id="expenseType" th:expenseType="earningType" style="width: 100%">
+                            <option th:each="expenseType,expenseTypeStat:${expenseTypeList}" th:value="${expenseType.categoriesCode}" th:text="${expenseType.categoriesValue}">
+
+                            </option>
+                        </select>
+                    </td>
+                    <td><font color="red">*</font></td>
+                    <td>支出金额</td>
+                    <td>
+                        <input th:type="number" style="width: 100%" th:id="expenseAmount" th:name="expenseAmount" />
+                    </td>
+                    <td><font color="red">*</font></td>
+                </tr>
+                <tr>
+                    <td>备注</td>
+                    <td colspan="6">
+                        <textarea th:rows="5" th:cols="50" th:id="remark" th:name="remark" />
+                    </td>
+                </tr>
+                <tr>
+                    <td></td><td></td>
+                    <td colspan="5" style="float: right"><input th:type="button" onclick="addExpenseAmount()" th:value="确定" /></td>
+                    <td colspan="2"><input th:type="button" onclick="cancelExpenseAmount()" th:value="取消" /></td>
+                </tr>
+            </table>
+        </form>
+    </body>
+
+    <script>
+
+        $(document).ready(function () {
+            var userId = localStorage.userId;
+            var accessToken = localStorage.accessToken;
+            if(userId == 0 || userId == undefined
+                    || accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            $("#userId").val(localStorage.userId);
+            $("#accessToken").val(localStorage.accessToken);
+        });
+
+        function addExpenseAmount() {
+            var expenseType = $("#expenseType").val();
+            var expenseAmount = $("#expenseAmount").val();
+            var remark = $("#remark").val();
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == 0 || accessToken == "" || accessToken == undefined){
+                alert("请先登录后再新增支出");
+                return;
+            }
+            if(expenseType == "" || expenseType == undefined){
+                alert("请选择支出类型");
+                return;
+            }
+            if(expenseAmount == "" || expenseAmount == undefined){
+                alert("请输入支出金额");
+                return;
+            }
+            var expenseArray = {};
+            expenseArray["expenseType"] = expenseType;
+            expenseArray["expenseAmount"] = expenseAmount;
+            expenseArray["remark"] = remark;
+            expenseArray["userId"] = userId;
+            expenseArray["accessToken"] = accessToken;
+            $.ajax({
+                url:"/addExpense",
+                type:"post",
+                dataType:"json",
+                contentType: "application/json",
+                beforeSend:function (request) {
+                    request.setRequestHeader("accessToken",accessToken);
+                },
+                async: false,
+                data:JSON.stringify(expenseArray),
+                success:function callbackFun(data){
+                    //解析json
+                    alert(data.responseDesc);
+                    if(data.responseCode = 200){
+                        window.close();
+                    }
+                },
+                error:function(data){
+                    alert(data);
+                }
+            });
+        }
+        
+        function cancelExpenseAmount() {
+            $("#expenseType").val("1");
+            $("#expenseAmount").val("");
+            $("#remark").val("");
+        }
+    </script>
+</html>

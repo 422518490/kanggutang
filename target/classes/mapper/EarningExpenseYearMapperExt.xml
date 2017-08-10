@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kanggutang.dao.EarningExpenseYearMapperExt">
+      <select id="getEarningExpenseYears" parameterType="earningExpenseYearDTO" resultType="earningExpenseYearDTO">
+        SELECT
+            EARNING_EXPENSE_YEAR_ID earningExpenseYearId,
+            EARNING_YEAR earningYear,
+            EXPENSE_YEAR expenseYear,
+            YEAR year,
+            CREATION_DATE creationDate,
+            DATE_FORMAT(CREATION_DATE,'%Y-%m-%d') creationDateStr
+        FROM
+            EARNING_EXPENSE_YEAR
+        WHERE 1=1
+        <if test="beginYear != null and beginYear != 0">
+          AND YEAR >= #{beginYear}
+        </if>
+        <if test="endYear != null and endYear != 0">
+          <![CDATA[
+              AND YEAR <= #{endYear}
+          ]]>
+        </if>
+        <if test="year != null and year != 0">
+          AND YEAR = #{year}
+        </if>
+        ORDER BY YEAR ASC
+      </select>
+</mapper>

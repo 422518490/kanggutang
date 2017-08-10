@@ -1,0 +1,154 @@
+.bodyShow{
+    background-color: blanchedalmond;
+}
+
+.tops{
+    height: 50px;
+    background-color: aquamarine;
+    position: fixed;
+    min-width:980px;
+    width: 100%;
+    z-index: 100;
+    color: orange;
+}
+
+.top_left{
+    text-indent: 20px;
+    float: left;
+    font-size: 20px;
+}
+.top_left a{
+    text-decoration: none;
+    margin: 0 1px;
+    padding: 0 10px;
+    line-height: 50px;
+}
+
+.top_left a:link a:visited{
+    text-decoration: underline;
+    color: #900b09;
+}
+
+.float_left{
+    float: left;
+    margin: 5px 5px 5px 5px;
+    padding: 2px 2px 2px 2px;
+}
+#earningDiv{
+    margin: 10px 5px 5px 5px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+#earningDiv ul{
+    position: relative;
+    list-style: none;
+    box-shadow: aquamarine;
+}
+
+#earningDiv ul li{
+    visibility: hidden;
+}
+
+#earningDiv:hover ul li{
+    visibility: visible;
+}
+
+#expenseDiv{
+    margin: 10px 5px 5px 5px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+#expenseDiv ul{
+    position: relative;
+    list-style: none;
+    box-shadow: aquamarine;
+}
+
+#expenseDiv ul li{
+    visibility: hidden;
+}
+
+#expenseDiv:hover ul li{
+    visibility: visible;
+}
+
+
+#earningExpenseDiv{
+    margin: 10px 5px 5px 5px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+#earningExpenseDiv ul{
+    position: relative;
+    list-style: none;
+    box-shadow: aquamarine;
+}
+
+#earningExpenseDiv ul li{
+    visibility: hidden;
+}
+
+#earningExpenseDiv:hover ul li{
+    visibility: visible;
+}
+
+#earningExpenseRunDiv{
+    margin: 10px 5px 5px 5px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+#earningExpenseRunDiv ul{
+    position: relative;
+    list-style: none;
+    box-shadow: aquamarine;
+}
+
+#earningExpenseRunDiv ul li{
+    visibility: hidden;
+}
+
+#earningExpenseRunDiv:hover ul li{
+    visibility: visible;
+}
+
+.top-right{
+    float: inherit;
+    margin: 12px 5px 5px 5px;
+}
+
+.top-right a{
+    color: orange;
+    align-content: center;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+.float_right{
+    float: right;
+    margin: 5px 5px 5px 5px;
+    padding: 2px 2px 2px 2px;
+}
+
+#userDiv{
+    margin: 1px 5px 5px 5px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+#userDiv ul{
+    position: relative;
+    list-style: none;
+    box-shadow: aquamarine;
+}
+
+#userDiv ul li{
+    visibility: hidden;
+}
+
+#userDiv:hover ul li{
+    visibility: visible;
+}

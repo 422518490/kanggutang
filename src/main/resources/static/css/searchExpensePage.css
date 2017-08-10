@@ -1,0 +1,11 @@
+.expenseTable{
+     border: 1px solid silver;
+     border-collapse: collapse;
+     word-break: break-all;
+ }
+
+.expenseTable th td{
+    padding: 3px;
+    display: table-cell;
+    vertical-align: inherit;
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kanggutang.dao.UserMapperExt" >
+      <select id="getUser" parameterType="userDTO" resultType="userDTO">
+            SELECT
+                USER_ID userId,
+                USER_NAME userName,
+                LOGIN_NAME loginName,
+                PASSWORD password,
+                ROLE_TYPE roleType,
+                STATUS status,
+                PHONE phone,
+                CREATION_DATE creationDate,
+                CREATED_BY createdBy,
+                LAST_UPDATE_DATE lastUpdateDate,
+                LAST_UPDATED_BY lastUpdatedBy
+            FROM
+                USER
+            WHERE
+                STATUS = 1
+            <if test="loginName != null and loginName != ''">
+                  AND LOGIN_NAME = #{loginName}
+            </if>
+            <if test="password != null and password != ''">
+                  AND PASSWORD = #{password}
+            </if>
+            <if test="userId != null and userId != 0">
+                  AND USER_ID = #{userId}
+            </if>
+            <if test="phone != null and phone != ''">
+                  AND PHONE = #{phone}
+            </if>
+      </select>
+
+      <update id="updatePwd" parameterType="userDTO">
+          UPDATE
+              USER
+          SET
+             PASSWORD = #{newPassword}
+          WHERE
+              USER_ID = #{userId}
+      </update>
+</mapper>

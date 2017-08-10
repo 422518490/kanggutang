@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+    <title>查看月收入支出</title>
+    <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/searchEarningExpenseMonthPage.css}" />
+    <link rel="stylesheet" th:href="@{/css/paginate.css}" media="screen" type="text/css" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.paginate.js}"></script>
+</head>
+<body>
+<input th:hidden="hidden" th:id="totalCount" th:value="${earningExpenseMonthCount}" />
+<input th:hidden="hidden" th:id="userId" />
+<input th:hidden="hidden" th:id="accessToken" />
+<div>
+    <table>
+        <tr>
+            <td>查询日期从</td>
+            <td>
+                <select th:id="beginYear" th:name="beginYear">
+                    <option th:each="beginYear,beginYearStat:${yearList}" th:value="${beginYear}" th:text="${beginYear}">
+                    </option>
+                </select>
+            </td>
+            <td>年</td>
+            <td>
+                <select th:id="beginMonth" th:name="beginMonth">
+                    <option th:each="beginMonth,beginMonthStat:${monthList}" th:value="${beginMonth}" th:text="${beginMonth}">
+                    </option>
+                </select>
+            </td>
+            <td>月</td>
+
+            <td>到</td>
+            <td>
+                <select th:id="endYear" th:name="endYear">
+                    <option th:each="endYear,endYearStat:${yearList}" th:value="${endYear}" th:text="${endYear}">
+                    </option>
+                </select>
+            </td>
+            <td>年</td>
+            <td>
+                <select th:id="endMonth" th:name="endMonth">
+                    <option th:each="endMonth,endMonthStat:${monthList}" th:value="${endMonth}" th:text="${endMonth}">
+                    </option>
+                </select>
+            </td>
+            <td>月</td>
+            <td>
+                <input th:type="button" th:value="查询" onclick="searchEarningExpenseMonth()" />
+            </td>
+            <td>
+                <input th:type="button" th:value="导出" onclick="exportEarningExpenseMonth()" />
+            </td>
+        </tr>
+    </table>
+</div>
+<div>
+    <table class="earningExpenseMonthTable" border="1">
+        <tr>
+            <td th:width="100px">年</td>
+            <td th:width="100px">月</td>
+            <td th:width="200px">收入金额</td>
+            <td th:width="200px">支出金额</td>
+            <td th:width="200px">创建时间</td>
+        </tr>
+        <tbody id="earningExpenseMonthBody">
+        <tr th:each="earningExpenseMonthDTO,earningExpenseMonthDTOStat:${earningExpenseMonthDTOList}">
+            <td th:text="${earningExpenseMonthDTO.year}"></td>
+            <td th:text="${earningExpenseMonthDTO.month}"></td>
+            <td th:text="${earningExpenseMonthDTO.earningMonth}"></td>
+            <td th:text="${earningExpenseMonthDTO.expenseMonth}"></td>
+            <td th:text="${earningExpenseMonthDTO.creationDateStr}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="earningExpenseMonthPageCount">
+</div>
+</body>
+
+<script>
+    /*<![CDATA[*/
+
+    $(document).ready(function () {
+        if(localStorage.accessToken == null || localStorage.accessToken == "" 
+                || localStorage.accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        $("#userId").val(localStorage.userId);
+        $("#accessToken").val(localStorage.accessToken);
+    });
+
+    function searchEarningExpenseMonth() {
+        queryForPages(1);
+    }
+
+    $(function() {
+        $("#earningExpenseMonthPageCount").paginate({
+            count: $("#totalCount").val(),
+            start: 1,
+            display: 15,
+            border: true,
+            border_color: '#fff',
+            text_color: '#fff',
+            background_color: '#9F35FF',
+            border_hover_color: '#ccc',
+            text_hover_color: '#000',
+            background_hover_color: '#fff',
+            images: false,
+            mouse: 'press',
+            onChange: queryForPages
+        });
+    });
+
+
+    function queryForPages(pageNum) {
+        var beginYear = $("#beginYear").val();
+        var beginMonth = $("#beginMonth").val();
+        var endYear = $("#endYear").val();
+        var endMonth = $("#endMonth").val();
+        var accessToken = localStorage.accessToken;
+        var userId = $("#userId").val();
+        if(accessToken == null || accessToken == "" || accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        if (beginYear > endYear) {
+            alert("开始年份不能大于结束年份");
+            return;
+        }
+        if (beginMonth > endMonth) {
+            alert("开始月份不能大于结束月份");
+            return;
+        }
+        var earningExpenseMonthArray = {};
+        earningExpenseMonthArray["beginYear"] = beginYear;
+        earningExpenseMonthArray["beginMonth"] = beginMonth;
+        earningExpenseMonthArray["endYear"] = endYear;
+        earningExpenseMonthArray["endMonth"] = endMonth;
+        earningExpenseMonthArray["pageNum"] = pageNum;
+        earningExpenseMonthArray["userId"] = userId;
+        earningExpenseMonthArray["accessToken"] = accessToken;
+        $.ajax({
+            url: "/getEarningExpenseMonths",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            beforeSend:function (request) {
+                request.setRequestHeader("accessToken",accessToken);
+            },
+            async: false,
+            data: JSON.stringify(earningExpenseMonthArray),
+            success: function callbackFun(data) {
+                //解析json
+                if (data.responseCode == 200) {
+                    var info = data.data;
+                    //清空数据
+                    clearDate();
+                    fillTable(info);
+                } else {
+                    alert(data.responseDesc);
+                    return;
+                }
+            }
+        });
+    }
+
+    //清空数据
+    function clearDate() {
+        $("#earningExpenseMonthBody").html("");
+    }
+
+    function fillTable(info) {
+
+        if (info.length > 0) {
+            var tbody_content = "";//不初始化字符串"",会默认"undefined"
+            if (info.length == 1) {
+                tbody_content += "<tr>"
+                        + "<td>" + info[0].year + "</td>"
+                        + "<td>" + info[0].month + "</td>"
+                        + "<td>" + info[0].earningMonth + "</td>"
+                        + "<td>" + info[0].expenseMonth + "</td>"
+                        + "<td>" + info[0].creationDateStr + "</td>"
+                        + "</tr>"
+                $("#earningExpenseMonthBody").html(tbody_content);
+            } else {
+                for (var i = 0; i <= info.length - 1; i++) {
+                    tbody_content += "<tr>"
+                            + "<td>" + info[i].year + "</td>"
+                            + "<td>" + info[i].month + "</td>"
+                            + "<td>" + info[i].earningMonth + "</td>"
+                            + "<td>" + info[i].expenseMonth + "</td>"
+                            + "<td>" + info[i].creationDateStr + "</td>"
+                            + "</tr>"
+                    $("#earningExpenseMonthBody").html(tbody_content);
+                }
+            }
+        } else {
+            $("#earningExpenseMonthBody").html("");
+        }
+    }
+
+    function exportEarningExpenseMonth() {
+        var beginYear = $("#beginYear").val();
+        var beginMonth = $("#beginMonth").val();
+        var endYear = $("#endYear").val();
+        var endMonth = $("#endMonth").val();
+        var accessToken = $("#accessToken").val();
+        var userId = $("#userId").val();
+        if(accessToken == null || accessToken == "" || accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        if (beginYear > endYear) {
+            alert("开始年份不能大于结束年份");
+            return;
+        }
+        if (beginMonth > endMonth) {
+            alert("开始月份不能大于结束月份");
+            return;
+        }
+        window.location.href = "/exportEarningExpenseMonth?beginYear="+beginYear
+                +"&beginMonth="+beginMonth
+                +"&endYear="+endYear+"&endMonth="+endMonth
+                +"&userId="+userId+"&accessToken="+accessToken;
+
+    }
+
+    /*]]>*/
+</script>
+</html>

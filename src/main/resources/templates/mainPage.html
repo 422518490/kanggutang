@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+    <head>
+        <title>主页面</title>
+        <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/mainPage.css}" />
+        <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    </head>
+    <body class="bodyShow">
+        <input th:hidden="hidden" th:id="userId" />
+        <input th:hidden="hidden" th:id="accessToken" />
+        <input th:hidden="hidden" th:id="loginName"/>
+        <div class="tops">
+            <div class="top_left">
+                <a href="#">康骨堂</a>
+            </div>
+            <div class="top_left">
+                <div id="earningDiv" class="float_left">
+                    <span>收入</span>
+                    <ul>
+                        <li><a href="#" onclick="addEarning()">新增收入</a></li>
+                        <li><a href="#" onclick="dayEarning()">每日收入</a></li>
+                        <li><a href="#" onclick="monthEarning()">每月收入</a></li>
+                        <li><a href="#" onclick="yearEarning()">每年收入</a></li>
+                    </ul>
+                </div>
+                <div id="expenseDiv" class="float_left">
+                    <span>支出</span>
+                    <ul>
+                        <li><a href="#" onclick="addExpense()">新增支出</a></li>
+                        <li><a href="#" onclick="dayExpense()">每日支出</a></li>
+                        <li><a href="#" onclick="monthExpense()">每月支出</a></li>
+                        <li><a href="#" onclick="yearExpense()">每年支出</a></li>
+                    </ul>
+                </div>
+                <div id="earningExpenseDiv" class="float_left">
+                    <span>收入支出</span>
+                    <ul>
+                        <li><a href="#" onclick="earningExpenseDay()">每天的收入支出</a></li>
+                        <li><a href="#" onclick="earningExpenseMonth()">每月的收入支出</a></li>
+                        <li><a href="#" onclick="earningExpenseYear()">每年的收入支出</a></li>
+                    </ul>
+                </div>
+                <div id="earningExpenseRunDiv" class="float_left">
+                    <span>手动运行收入支出</span>
+                    <ul>
+                        <li><a href="#" onclick="runEarningExpenseDay()">手动运行每天收入支出</a></li>
+                        <li><a href="#" onclick="runEarningExpenseMonth()">手动运行每月收入支出</a></li>
+                        <li><a href="#" onclick="runEarningExpenseYear()">手动运行每年收入支出</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="top-right">
+                <div id="userDiv" class="float_right">
+                    <span>用户操作</span>
+                    <ul>
+                        <li><a href="#" onclick="updatePwd()">修改密码</a></li>
+                        <li><a href="#" onclick="loginOut()">退出</a></li>
+                    </ul>
+                </div>
+                <!--<a href="#" onclick="loginOut()">退出</a>-->
+            </div>
+        </div>
+    </body>
+
+    <script>
+        $(document).ready(function () {
+            var userId = localStorage.userId;
+            var accessToken = localStorage.accessToken;
+            if(userId == 0 || userId == undefined
+                    || accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            $("#userId").val(localStorage.userId);
+            $("#accessToken").val(localStorage.accessToken);
+            $("#loginName").val(localStorage.loginName);
+        });
+
+        function loginOut() {
+            var userId = $("#userId").val();
+            var loginName = $("#loginName").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("用户已退出");
+                window.location.href = "/loginPage";
+                return;
+            }
+            var userArray = {};
+            userArray["loginName"] = loginName;
+            userArray["accessToken"] = accessToken;
+            $.ajax({
+                url:"/loginOut",
+                type:"post",
+                dataType:"json",
+                contentType: "application/json",
+                async: false,
+                data:JSON.stringify(userArray),
+                success:function callbackFun(data){
+                    //解析json
+                    alert(data.responseDesc);
+                    if(data.responseCode = 200){
+                        localStorage.removeItem("userId");
+                        localStorage.removeItem("accessToken");
+                        localStorage.removeItem("loginName");
+                        window.location.href = "/loginPage";
+                    }
+                },
+                error:function(data){
+                    alert(data);
+                }
+            });
+        }
+
+
+
+        function addEarning() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/addEarningPage","新增收入",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function dayEarning() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchEarningPage","每日收入",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function monthEarning() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchMonthEarningPage","每月收入",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function yearEarning() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchYearEarningPage","每年收入",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function addExpense() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/addExpensePage","新增支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function dayExpense() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchExpensePage","每日支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function monthExpense() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchMonthExpensePage","每月支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function yearExpense() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchYearExpensePage","每年支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function earningExpenseDay() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchEarningExpenseDayPage","每天收入支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function earningExpenseMonth() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchEarningExpenseMonthPage","每月收入支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+        
+        function earningExpenseYear() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchEarningExpenseYearPage","每年收入支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function runEarningExpenseDay() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchRunEarningExpenseDayPage","手动运行每天收入支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function runEarningExpenseMonth() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchRunEarningExpenseMonthPage","手动运行每月收入支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function runEarningExpenseYear() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/searchRunEarningExpenseYearPage","手动运行每年收入支出",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+
+        function updatePwd() {
+            var userId = $("#userId").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            window.open("/updatePwdPage","修改密码",
+                    "fullscreen=yes,status=yes,toolbar=yes, menubar=yes,location=yes,resizable=yes,scrollbars=yes")
+        }
+    </script>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+    <head>
+        <title>登陆界面</title>
+        <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/loginPage.css}" />
+        <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+        <script type="text/javascript" th:src="@{/js/jquery.form.js}"></script>
+    </head>
+    <body>
+        <form id="loginPageForm">
+            <table>
+                <tbody>
+                <tr>
+                    <td>账号</td>
+                    <td><input th:type="text" th:id="loginName" th:name="loginName" /></td>
+                    <td><font color="red">*</font></td>
+                </tr>
+                <tr>
+                    <td>密码</td>
+                    <td><input th:type="password" th:id="password" th:name="password" /></td>
+                    <td><font color="red">*</font></td>
+                </tr>
+                <tr>
+                    <td><input th:type="button" onclick="login()" th:value="确定" /></td>
+                    <td><input th:type="button" onclick="cancelLogin()" th:value="取消" /></td>
+                </tr>
+                <tr>
+                    <td><a href="/resetPwdPage" th:target="_self">重置密码</a></td>
+                    <td><a href="/addUserPage" th:target="_self">注册用户</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </body>
+
+    <script type="application/javascript">
+
+        $(document).keyup(function (event) {
+            if(event.keyCode == 13){
+                login();
+            }
+        });
+
+        function cancelLogin() {
+            $("#loginName").val("");
+            $("#password").val("");
+        }
+        function login() {
+            var loginPath = "/login";
+            var userArray = {};
+            var loginName = $("#loginName").val();
+            var password = $("#password").val();
+            if(loginName == ""){
+                alert("账号不能为空");
+                return false;
+            }
+            if(password == ""  ){
+                alert("密码不能为空");
+                return false;
+            }
+            userArray["loginName"] = loginName;
+            userArray["password"] = password;
+            $.ajax({
+                url:loginPath,
+                type:"post",
+                dataType:"json",
+                contentType: "application/json",
+                async: false,
+                data:JSON.stringify(userArray),
+                success:function callbackFun(data){
+                    //解析json
+                    alert(data.responseDesc);
+                    if(data.responseCode == 200){
+                        userArray = {};
+                        /*userArray["userId"] = data.userId;
+                        userArray["accessToken"] = data.accessToken;*/
+                        localStorage.userId = data.userId;
+                        localStorage.accessToken = data.accessToken;
+                        localStorage.loginName = data.loginName;
+                        window.location.href ="/mainPage";
+                    }
+                },
+                error:function(data){
+                    alert(data);
+                }
+            });
+        }
+    </script>
+</html>

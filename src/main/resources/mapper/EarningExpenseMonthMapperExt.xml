@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kanggutang.dao.EarningExpenseMonthMapperExt">
+    <select id="getEarningExpenseMonths" parameterType="earningExpenseMonthDTO" resultType="earningExpenseMonthDTO">
+      SELECT
+          EARNING_EXPENSE_MONTH_ID earningExpenseMonthId,
+          EARNING_MONTH earningMonth,
+          EXPENSE_MONTH expenseMonth,
+          YEAR year,
+          MONTH month,
+          CREATION_DATE creationDate,
+          DATE_FORMAT(CREATION_DATE,'%Y-%m-%d') creationDateStr
+      FROM
+          EARNING_EXPENSE_MONTH
+      WHERE 1=1
+      <if test="beginYear != null and beginYear != 0
+                and beginMonth != null and beginMonth != 0">
+        AND STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH),'%Y-%m') >= STR_TO_DATE(CONCAT_WS('-',#{beginYear},#{beginMonth}),'%Y-%m')
+      </if>
+      <if test="endYear != null and endYear != 0
+                  and endMonth != null and endMonth != 0">
+        <![CDATA[
+                  AND STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH),'%Y-%m') <= STR_TO_DATE(CONCAT_WS('-',#{endYear},#{endMonth}),'%Y-%m')
+              ]]>
+      </if>
+      <if test="year != null and year != 0">
+        AND YEAR = #{year}
+      </if>
+      <if test="month != null and month != 0">
+        AND MONTH = #{month}
+      </if>
+      ORDER BY STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH),'%Y-%m') ASC
+    </select>
+</mapper>

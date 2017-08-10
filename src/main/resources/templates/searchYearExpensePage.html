@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+    <title>查看年支出</title>
+    <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/searchExpensePage.css}" />
+    <link rel="stylesheet" th:href="@{/css/paginate.css}" media="screen" type="text/css" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.paginate.js}"></script>
+</head>
+<body>
+<input th:hidden="hidden" th:id="totalCount" th:value="${expenseCount}" />
+<input th:hidden="hidden" th:id="userId" />
+<input th:hidden="hidden" th:id="accessToken" />
+<div>
+    <table>
+        <tr>
+            <td>查询日期从</td>
+            <td>
+                <select th:id="beginYear" th:name="beginYear">
+                    <option th:each="beginYear,beginYearStat:${yearList}" th:value="${beginYear}" th:text="${beginYear}">
+                    </option>
+                </select>
+            </td>
+            <td>年</td>
+
+            <td>到</td>
+            <td>
+                <select th:id="endYear" th:name="endYear">
+                    <option th:each="endYear,endYearStat:${yearList}" th:value="${endYear}" th:text="${endYear}">
+                    </option>
+                </select>
+            </td>
+            <td>年</td>
+            <td>
+                <input th:type="button" th:value="查询" onclick="searchExpense()" />
+            </td>
+            <td>
+                <input th:type="button" th:value="导出" onclick="exportExpense()" />
+            </td>
+        </tr>
+    </table>
+</div>
+<div>
+    <table class="expenseTable" border="1">
+        <tr>
+            <td th:width="200px">年份</td>
+            <td th:width="200px">收入金额</td>
+        </tr>
+        <tbody id="expenseBody">
+        <tr th:each="expenseDTO,expenseDTOStat:${expenseDTOList}">
+            <td th:text="${expenseDTO.year}"></td>
+            <td th:text="${expenseDTO.expenseAmount}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="expensePageYearCount">
+</div>
+</body>
+
+<script>
+    /*<![CDATA[*/
+
+    $(document).ready(function () {
+        if(localStorage.accessToken == null || localStorage.accessToken == "" || localStorage.accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        $("#userId").val(localStorage.userId);
+        $("#accessToken").val(localStorage.accessToken);
+    });
+
+    function searchExpense() {
+        queryForPages(1);
+    }
+
+
+    $(function() {
+        $("#expensePageYearCount").paginate({
+            count: $("#totalCount").val(),
+            start: 1,
+            display: 15,
+            border: true,
+            border_color: '#fff',
+            text_color: '#fff',
+            background_color: '#9F35FF',
+            border_hover_color: '#ccc',
+            text_hover_color: '#000',
+            background_hover_color: '#fff',
+            images: false,
+            mouse: 'press',
+            onChange: queryForPages
+        });
+    });
+
+
+    function queryForPages(pageNum) {
+        var beginYear = $("#beginYear").val();
+        var endYear = $("#endYear").val();
+        var accessToken = localStorage.accessToken;
+        var userId = $("#userId").val();
+        if(accessToken == null || accessToken == "" || accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        if (beginYear > endYear) {
+            alert("开始年份不能大于结束年份");
+            return;
+        }
+        var earningArray = {};
+        earningArray["beginYear"] = beginYear;
+        earningArray["endYear"] = endYear;
+        earningArray["pageNum"] = pageNum;
+        earningArray["userId"] = userId;
+        earningArray["accessToken"] = accessToken;
+        $.ajax({
+            url: "/getYearExpenses",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            beforeSend:function (request) {
+                request.setRequestHeader("accessToken",accessToken);
+            },
+            async: false,
+            data: JSON.stringify(earningArray),
+            success: function callbackFun(data) {
+                //解析json
+                if (data.responseCode == 200) {
+                    var info = data.data;
+                    //清空数据
+                    clearDate();
+                    fillTable(info);
+                } else {
+                    alert(data.responseDesc);
+                    return;
+                }
+            }
+        });
+    }
+
+    //清空数据
+    function clearDate() {
+        $("#expenseBody").html("");
+    }
+
+    function fillTable(info) {
+
+        if (info.length > 0) {
+            var tbody_content = "";//不初始化字符串"",会默认"undefined"
+            if (info.length == 1) {
+                tbody_content += "<tr>"
+                        + "<td>" + info[0].year + "</td>"
+                        + "<td>" + info[0].expenseAmount + "</td>"
+                        + "</tr>"
+                $("#expenseBody").html(tbody_content);
+            } else {
+                for (var i = 0; i <= info.length - 1; i++) {
+                    tbody_content += "<tr>"
+                            + "<td>" + info[i].year + "</td>"
+                            + "<td>" + info[i].expenseAmount + "</td>"
+                            + "</tr>"
+                    $("#expenseBody").html(tbody_content);
+                }
+            }
+        } else {
+            $("#expenseBody").html("");
+        }
+    }
+
+    function exportExpense() {
+        var beginYear = $("#beginYear").val();
+        var endYear = $("#endYear").val();
+        var accessToken = $("#accessToken").val();
+        var userId = $("#userId").val();
+        if(accessToken == null || accessToken == "" || accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        if (beginYear > endYear) {
+            alert("开始年份不能大于结束年份");
+            return;
+        }
+        window.location.href = "/exportYearExpense?beginYear="+beginYear
+                +"&endYear="+endYear+"&userId="+userId
+                +"&accessToken="+accessToken;
+
+    }
+
+    /*]]>*/
+</script>
+</html>

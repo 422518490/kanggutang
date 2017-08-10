@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kanggutang.dao.BaseSubCategoriesDataInfoMapperExt" >
+    <select id="getCodeAndValueByBatch" parameterType="baseSubCategoriesDataInfoDTO" resultType="baseSubCategoriesDataInfoDTO">
+      SELECT
+          BSCDI.CATEGORIES_DATA_INFO_ID categoriesDataInfoId,
+          BSCDI.SUB_CATEGORIES_DATA_INFO_ID subCategoriesDataInfoId,
+          BSCDI.CATEGORIES_CODE categoriesCode,
+          BSCDI.CATEGORIES_VALUE categoriesValue
+      FROM
+          BASE_CATEGORIES_DATA_INFO BCDI,
+          BASE_SUB_CATEGORIES_DATA_INFO BSCDI
+      WHERE
+          BCDI.CATEGORIES_DATA_INFO_ID = BSCDI.CATEGORIES_DATA_INFO_ID
+      AND BCDI.CATEGORIES_NAME = #{categoriesName}
+      <if test="categoriesCodeList != null">
+        AND BSCDI.CATEGORIES_CODE IN
+        <foreach collection="categoriesCodeList" index="index" item="code" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+    </select>
+</mapper>

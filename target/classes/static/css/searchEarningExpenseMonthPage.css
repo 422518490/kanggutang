@@ -1,0 +1,11 @@
+.earningExpenseMonthTable{
+     border: 1px solid silver;
+     border-collapse: collapse;
+     word-break: break-all;
+ }
+
+.earningExpenseMonthTable th td{
+    padding: 3px;
+    display: table-cell;
+    vertical-align: inherit;
+}

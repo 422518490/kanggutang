@@ -1,0 +1,11 @@
+.earningExpenseDayTable{
+     border: 1px solid silver;
+     border-collapse: collapse;
+     word-break: break-all;
+ }
+
+.earningExpenseDayTable th td{
+    padding: 3px;
+    display: table-cell;
+    vertical-align: inherit;
+}

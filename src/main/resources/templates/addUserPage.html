@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+    <head>
+        <title>新增用户</title>
+        <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/addUserPage.css}" />
+        <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    </head>
+    <body>
+        <form id="addPageForm">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>账号</td>
+                        <td><input th:type="text" th:id="loginName" th:name="loginName" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td>密码</td>
+                        <td><input th:type="password" th:id="password" th:name="password" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td>用户类型</td>
+                        <td>
+                            <select th:id="roleType" th:name="roleType">
+                                <option th:each="roleType,roleTypeStat:${roleTypeList}" th:value="${roleType.categoriesCode}" th:text="${roleType.categoriesValue}">
+
+                                </option>
+                            </select>
+                        </td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td>电话</td>
+                        <td><input th:type="text" th:id="phone" th:name="phone" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td><input th:type="button" onclick="addUser()" th:value="确定" /></td>
+                        <td><input th:type="button" onclick="cancelAddUser()" th:value="取消" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </body>
+
+    <script>
+
+        /*$(document).ready(function () {
+            var userId = localStorage.userId;
+            var accessToken = localStorage.accessToken;
+            if(userId == 0 || userId == undefined
+                    || accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            $("#userId").val(localStorage.userId);
+            $("#accessToken").val(localStorage.accessToken);
+        });*/
+
+        function addUser() {
+            var loginName = $("#loginName").val();
+            var password = $("#password").val();
+            var roleType = $("#roleType").val();
+            var phone = $("#phone").val();
+            if(loginName == "" || loginName == undefined){
+                alert("账号不能为空");
+                return false;
+            }
+            if(password == "" || password == undefined){
+                alert("密码不能为空");
+                return false;
+            }
+            if(roleType == "" || roleType == undefined){
+                alert("用户类型不能为空");
+                return false;
+            }
+            if(phone == "" || phone == undefined){
+                alert("电话不能为空");
+                return false;
+            }
+            if(phone.length > 15){
+                alert("电话号码不能太长");
+                return false;
+            }
+            var userArray = {};
+            userArray["loginName"] = loginName;
+            userArray["password"] = password;
+            userArray["roleType"] = roleType;
+            userArray["phone"] = phone;
+            $.ajax({
+                url:"/addUser",
+                type:"post",
+                dataType:"json",
+                contentType: "application/json",
+                async: false,
+                data:JSON.stringify(userArray),
+                success:function callbackFun(data){
+                    //解析json
+                    alert(data.responseDesc);
+                    if(data.responseCode == 200){
+                        setTimeout(function(){
+                            //window.close();
+                            window.history.back();
+                        },500);
+                    }
+                },
+                error:function(data){
+                    alert(data);
+                }
+            });
+        }
+
+        function cancelAddUser() {
+            $("#loginName").val("");
+            $("#password").val("");
+            $("#roleType").val(1);
+            $("#phone").val("");
+        }
+    </script>
+</html>

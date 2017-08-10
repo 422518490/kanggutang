@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+    <title>手动运行每年收入支出</title>
+    <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/searchEarningExpenseDayPage.css}" />
+    <link rel="stylesheet" th:href="@{/css/paginate.css}" media="screen" type="text/css" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.paginate.js}"></script>
+</head>
+<body>
+<input th:hidden="hidden" th:id="userId" />
+<input th:hidden="hidden" th:id="accessToken" />
+<div>
+    <table>
+        <tr>
+            <td>运行日期从</td>
+            <td>
+                <select th:id="beginYear" th:name="beginYear">
+                    <option th:each="beginYear,beginYearStat:${yearList}" th:value="${beginYear}" th:text="${beginYear}">
+                    </option>
+                </select>
+            </td>
+            <td>年</td>
+
+
+            <td>到</td>
+            <td>
+                <select th:id="endYear" th:name="endYear">
+                    <option th:each="endYear,endYearStat:${yearList}" th:value="${endYear}" th:text="${endYear}">
+                    </option>
+                </select>
+            </td>
+            <td>年</td>
+            <td>
+                <input th:type="button" th:value="运行" onclick="runEarningExpenseYear()" />
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+<script>
+    /*<![CDATA[*/
+
+    $(document).ready(function () {
+        if(localStorage.accessToken == null || localStorage.accessToken == "" 
+                || localStorage.accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        $("#userId").val(localStorage.userId);
+        $("#accessToken").val(localStorage.accessToken);
+    });
+
+    function runEarningExpenseYear() {
+        var beginYear = $("#beginYear").val();
+        var endYear = $("#endYear").val();
+        var accessToken = localStorage.accessToken;
+        var userId = $("#userId").val();
+        if(accessToken == null || accessToken == "" || accessToken == undefined){
+            alert("请先登录");
+            window.location.href = "/loginPage";
+            return;
+        }
+        if (beginYear > endYear) {
+            alert("开始年份不能大于结束年份");
+            return;
+        }
+        var earningExpenseDayArray = {};
+        earningExpenseDayArray["beginYear"] = beginYear;
+        earningExpenseDayArray["endYear"] = endYear;
+        earningExpenseDayArray["userId"] = userId;
+        earningExpenseDayArray["accessToken"] = accessToken;
+        $.ajax({
+            url: "/runEarningExpenseYears",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            beforeSend:function (request) {
+                request.setRequestHeader("accessToken",accessToken);
+            },
+            async: false,
+            data: JSON.stringify(earningExpenseDayArray),
+            success: function callbackFun(data) {
+                alert(data.responseDesc);
+                return;
+            }
+        });
+    }
+
+
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+    <head>
+        <title>修改密码</title>
+        <link rel="stylesheet" type="text/css" media="screen" th:href="@{/css/addUserPage.css}" />
+        <script type="text/javascript" th:src="@{/js/jquery-3.2.1.js}"></script>
+    </head>
+    <body>
+        <input th:hidden="hidden" th:id="userId" />
+        <input th:hidden="hidden" th:id="accessToken" />
+        <form id="addPageForm">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>原密码</td>
+                        <td><input th:type="password" th:id="password" th:name="password" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td>新密码</td>
+                        <td><input th:type="password" th:id="newPassword" th:name="newPassword" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td>确认新密码</td>
+                        <td><input th:type="password" th:id="confirmPassword" th:name="confirmPassword" /></td>
+                        <td><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                        <td><input th:type="button" onclick="updatePwd()" th:value="确定" /></td>
+                        <td><input th:type="button" onclick="cancelUpdatePwd()" th:value="取消" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </body>
+
+    <script>
+
+        $(document).ready(function () {
+            var userId = localStorage.userId;
+            var accessToken = localStorage.accessToken;
+            if(userId == 0 || userId == undefined
+                    || accessToken == "" || accessToken == undefined){
+                alert("请先登录用户");
+                window.location.href = "/loginPage";
+                return;
+            }
+            $("#userId").val(localStorage.userId);
+            $("#accessToken").val(localStorage.accessToken);
+        });
+
+        $(document).keyup(function (event) {
+            if(event.keyCode == 13){
+                updatePwd();
+            }
+        });
+
+        function updatePwd() {
+            var password = $("#password").val();
+            var newPassword = $("#newPassword").val();
+            var confirmPassword = $("#confirmPassword").val();
+            var accessToken = localStorage.accessToken;
+            if(accessToken == null || accessToken == "" || accessToken == undefined){
+                alert("请先登录");
+                window.location.href = "/loginPage";
+                return;
+            }
+            if(password == "" || password == undefined){
+                alert("密码不能为空");
+                return false;
+            }
+            if(newPassword == "" || newPassword == undefined){
+                alert("新密码不能为空");
+                return false;
+            }
+            if(confirmPassword == "" || confirmPassword == undefined){
+                alert("确认密码不能为空");
+                return false;
+            }
+            if(newPassword != confirmPassword){
+                alert("新密码和确认密码必须一样");
+                return false;
+            }
+            var passwordArray = {};
+            passwordArray["userId"] = $("#userId").val();
+            passwordArray["password"] = password;
+            passwordArray["newPassword"] = newPassword;
+            passwordArray["confirmPassword"] = confirmPassword;
+            $.ajax({
+                url:"/updatePwd",
+                type:"post",
+                dataType:"json",
+                contentType: "application/json",
+                async: false,
+                beforeSend:function (request) {
+                    request.setRequestHeader("accessToken",accessToken);
+                },
+                data:JSON.stringify(passwordArray),
+                success:function callbackFun(data){
+                    //解析json
+                    alert(data.responseDesc);
+                    if(data.responseCode == 200){
+                        localStorage.removeItem("userId");
+                        localStorage.removeItem("accessToken");
+                        localStorage.removeItem("loginName");
+                        window.close();
+                    }
+                },
+                error:function(data){
+                    alert(data);
+                }
+            });
+        }
+
+        function cancelUpdatePwd() {
+            $("#password").val("");
+            $("#newPassword").val("");
+            $("#confirmPassword").val("");
+        }
+    </script>
+</html>

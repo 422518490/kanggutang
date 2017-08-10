@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kanggutang.dao.EarningExpenseDayMapperExt">
+    <select id="getEarningExpenseDays" parameterType="earningExpenseDayDTO" resultType="earningExpenseDayDTO">
+      SELECT
+          EARNING_EXPENSE_DAY_ID earningExpenseDayId,
+          EARNING_DAY earningDay,
+          EXPENSE_DAY expenseDay,
+          YEAR year,
+          MONTH month,
+          DAY day,
+          CREATION_DATE creationDate,
+          DATE_FORMAT(CREATION_DATE,'%Y-%m-%d') creationDateStr
+      FROM
+          EARNING_EXPENSE_DAY
+      WHERE 1=1
+      <if test="beginYear != null and beginYear != 0
+              and beginMonth != null and beginMonth != 0
+              and beginDay != null and beginDay != 0">
+        AND STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH,DAY),'%Y-%m-%d') >= STR_TO_DATE(CONCAT_WS('-',#{beginYear},#{beginMonth},#{beginDay}),'%Y-%m-%d')
+      </if>
+      <if test="endYear != null and endYear != 0
+                and endMonth != null and endMonth != 0
+                and endDay != null and endDay != 0">
+        <![CDATA[
+                AND STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH,DAY),'%Y-%m-%d') <= STR_TO_DATE(CONCAT_WS('-',#{endYear},#{endMonth},#{endDay}),'%Y-%m-%d')
+            ]]>
+      </if>
+      <if test="year != null and year != 0">
+          AND YEAR = #{year}
+      </if>
+      <if test="month != null and month != 0">
+          AND MONTH = #{month}
+      </if>
+      <if test="day != null and day != 0">
+          AND DAY = #{day}
+      </if>
+      ORDER BY STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH,DAY),'%Y-%m-%d') ASC
+    </select>
+
+
+    <select id="getLessThanEarningExpenseDays" parameterType="earningExpenseDayDTO" resultType="earningExpenseDayDTO">
+        SELECT
+            EARNING_EXPENSE_DAY_ID earningExpenseDayId,
+            EARNING_DAY earningDay,
+            EXPENSE_DAY expenseDay,
+            YEAR year,
+            MONTH month,
+            DAY day,
+            CREATION_DATE creationDate,
+            DATE_FORMAT(CREATION_DATE,'%Y-%m-%d') creationDateStr
+        FROM
+            EARNING_EXPENSE_DAY
+        WHERE 1=1
+        <if test="beginYear != null and beginYear != 0
+              and beginMonth != null and beginMonth != 0
+              and beginDay != null and beginDay != 0">
+            AND STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH,DAY),'%Y-%m-%d') >= STR_TO_DATE(CONCAT_WS('-',#{beginYear},#{beginMonth},#{beginDay}),'%Y-%m-%d')
+        </if>
+        <if test="endYear != null and endYear != 0
+                and endMonth != null and endMonth != 0
+                and endDay != null and endDay != 0">
+            <![CDATA[
+                AND STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH,DAY),'%Y-%m-%d') < STR_TO_DATE(CONCAT_WS('-',#{endYear},#{endMonth},#{endDay}),'%Y-%m-%d')
+            ]]>
+        </if>
+        ORDER BY STR_TO_DATE(CONCAT_WS('-',YEAR,MONTH,DAY),'%Y-%m-%d') ASC
+    </select>
+</mapper>
